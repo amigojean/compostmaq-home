@@ -18,6 +18,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Debug raw STS error
+        run: |
+          curl -s -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" | jq -r '.value' > /tmp/idtoken.txt
+          aws sts assume-role-with-web-identity --role-arn "${{ vars.AWS_ROLE_ARN }}" --role-session-name debugtest --web-identity-token file:///tmp/idtoken.txt --output json || true
+
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ vars.AWS_ROLE_ARN }}
